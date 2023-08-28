@@ -172,14 +172,17 @@ col2.markdown("<h4 style='text-align: center;'>games played</h4>", unsafe_allow_
 col2.altair_chart(games_by_pick, use_container_width=True, theme='streamlit')
 
 # footer
+kg = 'https://www.kaggle.com/datasets/nicholasliusontag/nfl-contract-and-draft-data'
+st.write('This dataset is available on [kaggle](%s)' % kg)
+
 li = 'https://www.linkedin.com/in/nliusont/'
 st.write('This dataset and streamlit app were developed \
-         by [Nick Liu-Sontag](%s), a data scientist :nerd_face: in Brooklyn, NY.' % li)
+         by [Nick Liu-Sontag](%s), a data scientist :nerd_face: in Brooklyn, NY' % li)
 
 pfr = 'https://www.pro-football-reference.com/draft/'
 otc = 'https://overthecap.com/contract-history'
 sptrc = 'https://www.spotrac.com/nfl/cba/'
-st.text('Sources: ')
+st.write('Sources: ')
 st.write('[Pro Football Reference](%s)' % pfr)
 st.write('[Over The Cap](%s)' % otc)
 st.write('[Spotrac](%s)' % sptrc)
