@@ -1,8 +1,6 @@
 import pandas as pd
 import streamlit as st
 import altair as alt
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 df = pd.read_pickle('data/all_2_contracts.pkl')
 min_year = df['draft_year'].min()
