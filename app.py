@@ -6,7 +6,7 @@ import numpy as np
 st.set_page_config(page_title="NFL Contract Data", layout="wide")
 st.title("Analyzing the contract values of NFL draft picks")
 st.write('If player contract values reflect player quality, do higher draft picks lead to better players?')
-st.text('These charts look at the guaranteed money in contracts normalized to the salary cap in the year the contract was signed. Use the filters to the left to explore the data.')
+st.write('These charts look at the guaranteed money in contracts normalized to the salary cap in the year the contract was signed. Use the filters to the left to explore the data.')
 
 
 ### defs
