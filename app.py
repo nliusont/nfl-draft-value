@@ -4,6 +4,12 @@ import altair as alt
 import numpy as np
 
 st.set_page_config(page_title="Analyzing the contract values of NFL draft picks", layout="wide")
+st.title("Analyzing the contract values of NFL draft picks")
+st.subheader('if player contract values reflect player quality, do higher draft picks leader to better players?')
+st.text('Data scraped from the following sources:')
+st.write('[Pro Football Reference](%s)' % https://www.pro-football-reference.com/draft/)
+st.write('[Over The Cap](%s)' % https://overthecap.com/contract-history)
+st.write('[Spotrac](%s)' % https://www.spotrac.com/nfl/cba/)
 
 ### defs
 
@@ -27,7 +33,7 @@ positions = list(np.sort(df1['pos'].unique()))
 pos_list = ['All positions'] + positions
 
 
-st.title("Analyzing the contract values of NFL draft picks")
+
 selected_pos = st.multiselect("select positions", 
                               options=pos_list,
                               default='QB'
