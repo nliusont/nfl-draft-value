@@ -3,7 +3,7 @@ import streamlit as st
 import altair as alt
 import numpy as np
 
-st.set_page_config(page_title="Analyzing the contract values of NFL draft picks", layout="wide")
+st.set_page_config(page_title="NFL Contract Data", layout="wide")
 st.title("Analyzing the contract values of NFL draft picks")
 st.write('If player contract values reflect player quality, do higher draft picks lead to better players?')
 st.text('These charts look at the guaranteed money in contracts normalized to the salary cap in the year the contract was signed. Use the filters to the left to explore the data.')
@@ -171,11 +171,15 @@ col2.altair_chart(year_two_plot, use_container_width=True, theme='streamlit')
 col2.markdown("<h4 style='text-align: center;'>games played</h4>", unsafe_allow_html=True)
 col2.altair_chart(games_by_pick, use_container_width=True, theme='streamlit')
 
-# refs
+# footer
+li = 'https://www.linkedin.com/in/nliusont/'
+st.write('This dataset and streamlit app were developed \
+         by [Nick Liu-Sontag](%s), a data scientist :nerd_face: in Brooklyn, NY.' % li)
+
 pfr = 'https://www.pro-football-reference.com/draft/'
 otc = 'https://overthecap.com/contract-history'
 sptrc = 'https://www.spotrac.com/nfl/cba/'
-st.write('Sources: ')
+st.text('Sources: ')
 st.write('[Pro Football Reference](%s)' % pfr)
 st.write('[Over The Cap](%s)' % otc)
 st.write('[Spotrac](%s)' % sptrc)
