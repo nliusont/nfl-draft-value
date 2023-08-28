@@ -2,7 +2,6 @@ import pandas as pd
 import streamlit as st
 import altair as alt
 import numpy as np
-import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Analyzing the contract values of NFL draft picks", layout="wide")
 st.title("Analyzing the contract values of NFL draft picks")
