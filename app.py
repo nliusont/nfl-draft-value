@@ -24,7 +24,7 @@ def filter_df(df, year_selection, pos_selection):
 ### imports
 df1 = pd.read_pickle('data/all_1_contracts.pkl')
 df2 = pd.read_pickle('data/all_2_contracts.pkl')
-df = pd.read_pickle('data/combined_data_2000-2023.pkl')
+df = pd.read_pickle('data/grouped_by_player_2000-2023.pkl')
 
 ### set colors
 color_scheme = 'darkblue'
@@ -39,16 +39,24 @@ positions = list(np.sort(df1['pos'].unique()))
 pos_list = ['All positions'] + positions
 
 with st.sidebar:
-    selected_pos = st.multiselect("select positions", 
+    selected_pos = st.multiselect("select positions:", 
                                 options=pos_list,
                                 default='QB'
                                 )
 
-    selected_years = st.slider("select a range of draft years to look at", 
+    selected_years = st.slider("select draft years:", 
                 value=[min_year, max_year],
                 min_value=min_year, 
                 max_value=max_year, 
                 step=1)
+    
+    # num players
+    # drop values that aren't whole numbers since it means different players were grouped together
+    df = df[df['draft_year'] % 1 ==0] 
+    df = df[df['pick'] % 1 ==0]
+    select_df = filter_df(df, selected_years, selected_pos)
+    num_players = len(select_df)
+    st.write(f'{num_players} players selected')
     
     ## sidebar legend
     ### get colors from color scheme
@@ -75,22 +83,8 @@ with st.sidebar:
 ### select dfs
 select_df1 = filter_df(df1, selected_years, selected_pos)
 select_df2 = filter_df(df2, selected_years, selected_pos)
+#select_df occurs in sidebar
 
-df = df[['player', 'gtd_norm', 'draft_year', 'pos', 'pick','search_key', 'g']]\
-        .groupby('search_key')\
-        .agg({
-            'player':'max',
-            'draft_year':'mean',
-            'gtd_norm': 'sum',
-            'pos':'max',
-            'pick':'mean',
-            'g':'mean'})\
-        .reset_index()  # group by player
-
-# drop values that aren't whole numbers since it means different players were grouped together
-df = df[df['draft_year'] % 1 ==0] 
-df = df[df['pick'] % 1 ==0]
-select_df = filter_df(df, selected_years, selected_pos)
 
 ### games by pick no
 games_by_pick = alt.Chart(select_df1).mark_circle(size=75).encode(
