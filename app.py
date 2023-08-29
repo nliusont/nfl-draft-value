@@ -10,14 +10,19 @@ st.write('These charts look at the guaranteed money in contracts normalized to t
 
 
 ### defs
+max_pick = 262
 
-def filter_df(df, year_selection, pos_selection):
-    if pos_selection[0]=='All positions':
+def filter_df(df, year_selection, pos_selection, team_selection, max_pick=max_pick):
+    if ('All positions' in pos_selection) or len(pos_selection)==0:
         pos_selection=positions
+    if ('All teams' in team_selection) or len(team_selection)==0:
+        team_selection=teams
     criteria = (df['draft_year'] >= year_selection[0]) \
                     & (df['draft_year'] <= year_selection[1]) \
-                    & (df['pos'].isin(pos_selection))
+                    & (df['pos'].isin(pos_selection)) \
+                    & (df['signing_tm'].isin(team_selection))
     new_df = df[criteria].copy()
+    new_df = new_df[new_df['pick']<max_pick]
     new_df['draft_year'] = new_df['draft_year'].astype(int).astype(str)
     return new_df
 
@@ -35,13 +40,21 @@ custom_color_scale = alt.Scale(scheme=color_scheme)
 ### selectors sidebar
 min_year = df1['draft_year'].min()
 max_year = df1['draft_year'].max()
-positions = list(np.sort(df1['pos'].unique()))
+positions = list(np.sort(df['pos'].unique()))
 pos_list = ['All positions'] + positions
+
+teams = list(np.sort(df['signing_tm'].unique()))
+team_list = ['All teams'] + teams
 
 with st.sidebar:
     selected_pos = st.multiselect("select positions:", 
                                 options=pos_list,
                                 default='QB'
+                                )
+    
+    selected_tms = st.multiselect("select teams:", 
+                                options=team_list,
+                                default='All teams'
                                 )
 
     selected_years = st.slider("select draft years:", 
@@ -49,13 +62,17 @@ with st.sidebar:
                 min_value=min_year, 
                 max_value=max_year, 
                 step=1)
-    
-    # num players
+
+    # select df
     # drop values that aren't whole numbers since it means different players were grouped together
     df = df[df['draft_year'] % 1 ==0] 
     df = df[df['pick'] % 1 ==0]
-    select_df = filter_df(df, selected_years, selected_pos)
-    num_players = len(select_df)
+    select_df = filter_df(df, selected_years, selected_pos, selected_tms)
+    select_df1 = filter_df(df1, selected_years, selected_pos, selected_tms)
+    select_df2 = filter_df(df2, selected_years, selected_pos, selected_tms)
+
+    # num players
+    num_players = len(set(select_df['player'].to_list()+select_df1['player'].to_list()+select_df2['player'].to_list()))
     st.write(f'{num_players} players selected')
     
     ## sidebar legend
@@ -80,19 +97,18 @@ with st.sidebar:
     st.write('')
     st.altair_chart(chart, use_container_width=False)
 
-### select dfs
-select_df1 = filter_df(df1, selected_years, selected_pos)
-select_df2 = filter_df(df2, selected_years, selected_pos)
-#select_df occurs in sidebar
+
 
 
 ### games by pick no
 games_by_pick = alt.Chart(select_df1).mark_circle(size=75).encode(
-    x=alt.X('pick', title='draft pick number'),
+    x=alt.X('pick', 
+            title='draft pick number',
+            scale=alt.Scale(domain=(0, max_pick))
+        ),
     y=alt.Y(
         'g', 
-        title='games played',
-        scale=alt.Scale(domain=(0, select_df1['g'].max()))
+        title='games played'
         ),
     tooltip=['player', 'pick', 'pos', 'g'],
     color=alt.Color('draft_year', scale=custom_color_scale)
@@ -101,8 +117,11 @@ games_by_pick = alt.Chart(select_df1).mark_circle(size=75).encode(
 games_by_pick = games_by_pick.configure_legend(disable=True)
 
 ### total earnings by pick no.
-total_earnings = alt.Chart(select_df).mark_circle(size=75).encode(
-    x=alt.X('pick', title='draft pick number'),
+total_earnings = alt.Chart(select_df).mark_circle(size=100).encode(
+    x=alt.X('pick', 
+            title='draft pick number',
+            scale=alt.Scale(domain=(0, max_pick))
+        ),
     y=alt.Y(
         'gtd_norm', 
         title='guaranteed money (normalized)'
@@ -117,8 +136,11 @@ total_earnings = total_earnings.configure_legend(
 )
 
 ### year one contracts
-year_one_plot = alt.Chart(select_df1).mark_circle(size=75).encode(
-    x=alt.X('pick', title='draft pick number'),
+year_one_plot = alt.Chart(select_df1).mark_circle(size=100).encode(
+    x=alt.X('pick', 
+            title='draft pick number',
+            scale=alt.Scale(domain=(0, max_pick))
+        ),
     y=alt.Y(
         'gtd_norm', 
         title='guaranteed money (normalized)',
@@ -134,8 +156,11 @@ year_one_plot = year_one_plot.configure_legend(
 )
 
 ### year 2 contracts
-year_two_plot = alt.Chart(select_df2).mark_circle(size=75).encode(
-    x=alt.X('pick', title='draft pick number'),
+year_two_plot = alt.Chart(select_df2).mark_circle(size=100).encode(
+    x=alt.X('pick', 
+            title='draft pick number',
+            scale=alt.Scale(domain=(0, max_pick))
+            ),
     y=alt.Y(
         'gtd_norm', 
         title='guaranteed money (normalized)', 
@@ -147,7 +172,7 @@ year_two_plot = alt.Chart(select_df2).mark_circle(size=75).encode(
 
 year_two_plot = year_two_plot.configure_legend(disable=True)
 
-scatterplot = alt.Chart(select_df2).mark_circle(size=75).encode(
+scatterplot = alt.Chart(select_df2).mark_circle(size=100).encode(
     x=alt.X('pick', title='draft pick number'),
     y=alt.Y('contract_rank_scaled', scale=alt.Scale(reverse=True), title='relative contract value'),
     tooltip=['player', 'draft_year', 'pos', alt.Tooltip('gtd_norm_scaled', format='.2f')]
