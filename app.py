@@ -49,7 +49,7 @@ team_list = ['All teams'] + teams
 with st.sidebar:
     selected_pos = st.multiselect("select positions:", 
                                 options=pos_list,
-                                default='QB'
+                                default='All positions'
                                 )
     
     selected_tms = st.multiselect("select teams:", 
