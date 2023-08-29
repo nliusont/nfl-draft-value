@@ -97,7 +97,7 @@ with st.sidebar:
     st.write('')
     st.altair_chart(chart, use_container_width=False)
 
-
+# set max y axis for first contract and second contract charts so they are synced
 max_gtd1 = select_df1['gtd_norm'].max()
 max_gtd2 = select_df1['gtd_norm'].max()
 max_gtd = np.max([max_gtd1, max_gtd2])
