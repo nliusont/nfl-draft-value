@@ -12,24 +12,24 @@ st.write('These charts look at the guaranteed money in contracts normalized to t
 ### defs
 max_pick = 262
 
-def filter_df(df, year_selection, pos_selection, team_selection, max_pick=max_pick):
+def filter_df(df, year_selection, filter_year_on, pos_selection, team_selection, filter_team_on, max_pick=max_pick):
     if ('All positions' in pos_selection) or len(pos_selection)==0:
         pos_selection=positions
     if ('All teams' in team_selection) or len(team_selection)==0:
         team_selection=teams
-    criteria = (df['draft_year'] >= year_selection[0]) \
-                    & (df['draft_year'] <= year_selection[1]) \
+    criteria = (df[filter_year_on] >= year_selection[0]) \
+                    & (df[filter_year_on] <= year_selection[1]) \
                     & (df['pos'].isin(pos_selection)) \
-                    & (df['signing_tm'].isin(team_selection))
+                    & (df[filter_team_on].isin(team_selection))
     new_df = df[criteria].copy()
     new_df = new_df[new_df['pick']<max_pick]
-    new_df['draft_year'] = new_df['draft_year'].astype(int).astype(str)
+    new_df[filter_year_on] = new_df[filter_year_on].astype(int).astype(str)
     return new_df
 
 ### imports
 df1 = pd.read_pickle('data/all_1_contracts.pkl')
 df2 = pd.read_pickle('data/all_2_contracts.pkl')
-df = pd.read_pickle('data/grouped_by_player_2000-2023.pkl')
+df = pd.read_pickle('data/all_contracts_2000-2023.pkl')
 
 ### set colors
 color_scheme = 'darkblue'
@@ -57,7 +57,7 @@ with st.sidebar:
                                 default='All teams'
                                 )
 
-    selected_years = st.slider("select draft years:", 
+    selected_years = st.slider("select years:", 
                 value=[min_year, max_year],
                 min_value=min_year, 
                 max_value=max_year, 
@@ -67,9 +67,9 @@ with st.sidebar:
     # drop values that aren't whole numbers since it means different players were grouped together
     df = df[df['draft_year'] % 1 ==0] 
     df = df[df['pick'] % 1 ==0]
-    select_df = filter_df(df, selected_years, selected_pos, selected_tms)
-    select_df1 = filter_df(df1, selected_years, selected_pos, selected_tms)
-    select_df2 = filter_df(df2, selected_years, selected_pos, selected_tms)
+    select_df = filter_df(df, selected_years, 'year_signed', selected_pos, selected_tms, 'signing_tm')
+    select_df1 = filter_df(df1, selected_years, 'draft_year', selected_pos, selected_tms, 'tm')
+    select_df2 = filter_df(df2, selected_years, 'year_signed', selected_pos, selected_tms, 'signing_tm')
 
     # num players
     num_players = len(set(select_df['player'].to_list()+select_df1['player'].to_list()+select_df2['player'].to_list()))
@@ -98,7 +98,9 @@ with st.sidebar:
     st.altair_chart(chart, use_container_width=False)
 
 
-
+max_gtd1 = select_df1['gtd_norm'].max()
+max_gtd2 = select_df1['gtd_norm'].max()
+max_gtd = np.max([max_gtd1, max_gtd2])
 
 ### games by pick no
 games_by_pick = alt.Chart(select_df1).mark_circle(size=75).encode(
@@ -110,7 +112,7 @@ games_by_pick = alt.Chart(select_df1).mark_circle(size=75).encode(
         'g', 
         title='games played'
         ),
-    tooltip=['player', 'pick', 'pos', 'g'],
+    tooltip=['player', 'draft_year', 'pick', 'pos', 'g'],
     color=alt.Color('draft_year', scale=custom_color_scale)
 )
 
@@ -123,10 +125,10 @@ total_earnings = alt.Chart(select_df).mark_circle(size=100).encode(
             scale=alt.Scale(domain=(0, max_pick))
         ),
     y=alt.Y(
-        'gtd_norm', 
+        'gtd_norm_sum', 
         title='guaranteed money (normalized)'
         ),
-    tooltip=['player', 'pick', 'pos', 'g'],
+    tooltip=['player', 'draft_year', 'pick', 'pos', 'g'],
     color=alt.Color('draft_year', scale=custom_color_scale)
 )
 
@@ -144,9 +146,9 @@ year_one_plot = alt.Chart(select_df1).mark_circle(size=100).encode(
     y=alt.Y(
         'gtd_norm', 
         title='guaranteed money (normalized)',
-        scale=alt.Scale(domain=(0, select_df2['gtd_norm'].max()))
+        scale=alt.Scale(domain=(0, max_gtd))
         ),
-    tooltip=['player', 'draft_year', 'pick', 'pos', alt.Tooltip('gtd_norm', format='.2f')],
+    tooltip=['player', 'tm', 'draft_year', 'pick', 'pos', alt.Tooltip('gtd_norm', format='.2f')],
     color=alt.Color('draft_year', scale=custom_color_scale)
 )
 
@@ -164,9 +166,9 @@ year_two_plot = alt.Chart(select_df2).mark_circle(size=100).encode(
     y=alt.Y(
         'gtd_norm', 
         title='guaranteed money (normalized)', 
-        scale=alt.Scale(domain=(0, select_df2['gtd_norm'].max()))
+        scale=alt.Scale(domain=(0, max_gtd))
         ),
-    tooltip=['player', 'draft_year', 'pick', 'pos', alt.Tooltip('gtd_norm', format='.2f')],
+    tooltip=['player', 'signing_tm', 'year_signed', 'pick', 'pos', alt.Tooltip('gtd_norm', format='.2f')],
     color=alt.Color('draft_year', scale=custom_color_scale)
 )
 
