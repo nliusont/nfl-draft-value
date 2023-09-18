@@ -81,7 +81,7 @@ with st.sidebar:
     num_colors = len(years)
     year_color_mapping = pd.DataFrame({
         'year': [str(x) for x in years],
-        'count': [1 for x in years]  # Example colors
+        'count': [1 for x in years]
     })
 
     # Create a color scale based on the color scheme
@@ -89,9 +89,9 @@ with st.sidebar:
 
     # Create an Altair chart using the color encoding
     chart = alt.Chart(year_color_mapping).mark_bar().encode(
-        y='year',  # 'year' is used as both nominal and ordinal (discrete) axis
-        x=alt.X('count', axis=alt.Axis(title=None, labels=False)),  # Sample count for demonstration
-        color=alt.Color('year', scale=custom_color_scale)  # Use the defined color encoding
+        y='year',
+        x=alt.X('count', axis=alt.Axis(title=None, labels=False)),
+        color=alt.Color('year', scale=custom_color_scale)
     )
     chart = chart.configure_legend(disable=True).properties(width=95)
     st.write('')
@@ -115,8 +115,8 @@ games_by_pick = alt.Chart(select_df1).mark_circle(size=75).encode(
     tooltip=['player', 'draft_year', 'pick', 'pos', 'g'],
     color=alt.Color('draft_year', scale=custom_color_scale)
 )
-
 games_by_pick = games_by_pick.configure_legend(disable=True)
+games_by_pick = games_by_pick.configure_axisY(orient='right')
 
 ### total earnings by pick no.
 total_earnings = alt.Chart(select_df).mark_circle(size=100).encode(
@@ -171,8 +171,8 @@ year_two_plot = alt.Chart(select_df2).mark_circle(size=100).encode(
     tooltip=['player', 'signing_tm', 'year_signed', 'pick', 'pos', alt.Tooltip('gtd_norm', format='.2f')],
     color=alt.Color('draft_year', scale=custom_color_scale)
 )
-
 year_two_plot = year_two_plot.configure_legend(disable=True)
+year_two_plot = year_two_plot.configure_axisY(orient='right')
 
 scatterplot = alt.Chart(select_df2).mark_circle(size=100).encode(
     x=alt.X('pick', title='draft pick number'),
@@ -196,7 +196,7 @@ col2.altair_chart(games_by_pick, use_container_width=True, theme='streamlit')
 kg = 'https://www.kaggle.com/datasets/nicholasliusontag/nfl-contract-and-draft-data'
 st.write('This dataset is available on [kaggle](%s)' % kg)
 
-li = 'https://www.linkedin.com/in/nliusont/'
+li = 'https://www.nls.website'
 st.write('This dataset and streamlit app were developed \
          by [Nick Liu-Sontag](%s), a data scientist :nerd_face: in Brooklyn, NY' % li)
 
